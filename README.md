@@ -6,8 +6,8 @@ BeloGuesser is a browser-based game inspired by GeoGuessr mechanics. The player 
 
 <img width="500" alt="image_2026-06-08_18-21-10" src="https://github.com/user-attachments/assets/2c36fb6f-3345-41a6-bdc4-4040b660a77e" />
 <img width="500" alt="image_2026-06-08_18-22-37" src="https://github.com/user-attachments/assets/82b4c3ab-8733-4cbe-86a4-11d4c20800cf" />
-<img width="500" alt="image_2026-06-08_18-20-53" src="https://github.com/user-attachments/assets/726f1d6e-5721-4aa3-a2a0-b151aa6516e2" />
 <img width="500" alt="image_2026-06-08_18-42-44" src="https://github.com/user-attachments/assets/5a419378-a767-4ba7-8677-0ce40e4171f5" />
+<img width="500" alt="image_2026-06-08_18-20-53" src="https://github.com/user-attachments/assets/726f1d6e-5721-4aa3-a2a0-b151aa6516e2" />
 
 ## Key Features
 
