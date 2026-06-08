@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="game.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=8a6d7beb-5fe3-44f3-b66b-5bc9dcc278c4&lang=ru_RU"></script>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  </head>
+  <body>
+    <div id="player">
+      <div id="minimap-container">
+        <div id="layer-switcher">
+          <button class="active" onclick="setLayer('osm')">Карта</button>
+          <button onclick="setLayer('satellite')">Спутник</button>
+          <button onclick="setLayer('hybrid')">Гибрид</button>
+        </div>
+        <div id="minimap"></div>
+        <button id="guessBtn">GUESS</button>
+      </div>
+    </div>
+    <script src="game.js"></script>
+  </body>
+</html>

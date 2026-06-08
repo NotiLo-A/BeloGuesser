@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BeloGuesser · Result</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --red: #cc1f1f;
+        --red-dark: #9b1515;
+        --red-light: #f5dada;
+        --bg: #fafaf8;
+        --surface: #fafaf8;
+        --black: #111110;
+        --gray: #888882;
+        --border: rgba(17, 17, 16, 0.12);
+        --map-filter: none;
+      }
+
+      [data-theme="dark"] {
+        --red: #e84040;
+        --red-dark: #c02020;
+        --red-light: #4a1f1f;
+        --bg: #1a1918;
+        --surface: #222120;
+        --black: #f0efec;
+        --gray: #9a9a94;
+        --border: rgba(240, 239, 236, 0.18);
+        --map-filter: brightness(0.85) saturate(0.9);
+      }
+
+      html,
+      body {
+        height: 100%;
+        background: var(--bg);
+        color: var(--black);
+        font-family: "DM Mono", monospace;
+        font-weight: 300;
+        transition:
+          background 0.25s,
+          color 0.25s;
+      }
+
+      body {
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        min-height: 100vh;
+      }
+
+      header {
+        border-bottom: 1px solid var(--border);
+        padding: 0 48px;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: var(--bg);
+        transition:
+          background 0.25s,
+          border-color 0.25s;
+      }
+
+      .logo {
+        font-family: "Bebas Neue", sans-serif;
+        font-size: 28px;
+        letter-spacing: 0.05em;
+        color: var(--red);
+        text-decoration: none;
+        user-select: none;
+      }
+      .logo span {
+        color: var(--black);
+      }
+
+      .header-right {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .theme-btn {
+        width: 36px;
+        height: 36px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: transparent;
+        color: var(--gray);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition:
+          color 0.15s,
+          border-color 0.15s;
+        flex-shrink: 0;
+      }
+      .theme-btn:hover {
+        color: var(--black);
+        border-color: var(--black);
+      }
+      .theme-btn svg {
+        width: 16px;
+        height: 16px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      main {
+        display: grid;
+        grid-template-columns: 340px 1fr;
+        gap: 0;
+        overflow: hidden;
+      }
+
+      .sidebar {
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        padding: 32px 28px;
+        gap: 28px;
+        overflow-y: auto;
+        background: var(--bg);
+        transition:
+          background 0.25s,
+          border-color 0.25s;
+      }
+
+      .page-title {
+        font-family: "Bebas Neue", sans-serif;
+        font-size: 42px;
+        letter-spacing: 0.04em;
+        line-height: 1;
+        color: var(--black);
+      }
+
+      .distance-card {
+        background: var(--red);
+        border-radius: 12px;
+        padding: 20px 22px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .distance-label {
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.7);
+        font-weight: 400;
+      }
+
+      .distance-value {
+        font-family: "Bebas Neue", sans-serif;
+        font-size: 64px;
+        line-height: 1;
+        letter-spacing: 0.02em;
+        color: white;
+      }
+
+      .distance-value .unit {
+        font-size: 28px;
+        opacity: 0.8;
+      }
+
+      .score-card {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px 22px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        background: var(--surface);
+        transition:
+          background 0.25s,
+          border-color 0.25s;
+      }
+
+      .score-label {
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--gray);
+        font-weight: 400;
+      }
+
+      .score-value {
+        font-family: "Bebas Neue", sans-serif;
+        font-size: 52px;
+        line-height: 1;
+        letter-spacing: 0.02em;
+        color: var(--black);
+      }
+
+      .locations {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .section-label {
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--gray);
+        font-weight: 400;
+      }
+
+      .loc-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 14px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: var(--surface);
+        transition:
+          background 0.25s,
+          border-color 0.25s;
+      }
+
+      .loc-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        border: 2px solid white;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+      }
+      .loc-dot.actual {
+        background: #2ecc71;
+      }
+      .loc-dot.guess {
+        background: #3498db;
+      }
+
+      .loc-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+      }
+
+      .loc-name {
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--gray);
+      }
+
+      .loc-coords {
+        font-size: 13px;
+        color: var(--black);
+        letter-spacing: 0.02em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .btn-group {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: auto;
+      }
+
+      .btn {
+        width: 100%;
+        height: 52px;
+        border: none;
+        border-radius: 10px;
+        font-family: "Bebas Neue", sans-serif;
+        font-size: 20px;
+        letter-spacing: 0.1em;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 20px;
+        transition:
+          background 0.15s,
+          transform 0.1s;
+      }
+      .btn:active {
+        transform: scale(0.99);
+      }
+      .btn svg {
+        width: 18px;
+        height: 18px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .btn-retry {
+        background: var(--red);
+        color: white;
+      }
+      .btn-retry:hover {
+        background: var(--red-dark);
+      }
+
+      .btn-home {
+        background: transparent;
+        color: var(--black);
+        border: 1px solid var(--border);
+      }
+      .btn-home:hover {
+        border-color: var(--black);
+      }
+
+      .map-area {
+        position: relative;
+        background: #e8e8e6;
+      }
+
+      #result-map {
+        width: 100%;
+        height: 100%;
+      }
+
+      #result-map {
+        filter: var(--map-filter);
+      }
+
+      .leaflet-control-attribution {
+        display: none !important;
+      }
+
+      footer {
+        border-top: 1px solid var(--border);
+        padding: 14px 48px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: var(--bg);
+        transition: background 0.25s;
+      }
+
+      .footer-text {
+        font-size: 11px;
+        color: var(--gray);
+        letter-spacing: 0.04em;
+      }
+
+      @media (max-width: 700px) {
+        main {
+          grid-template-columns: 1fr;
+          grid-template-rows: auto 320px;
+        }
+        .sidebar {
+          border-right: none;
+          border-bottom: 1px solid var(--border);
+          padding: 20px;
+          gap: 16px;
+        }
+        header,
+        footer {
+          padding: 0 20px;
+        }
+        .page-title {
+          font-size: 32px;
+        }
+        .distance-value {
+          font-size: 48px;
+        }
+        .btn-group {
+          flex-direction: row;
+          margin-top: 0;
+        }
+        .btn {
+          flex: 1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <a class="logo" href="index.html">Belo<span>Guesser</span></a>
+      <div class="header-right">
+        <button class="theme-btn" id="theme-btn" title="Toggle theme">
+          <svg id="theme-icon-sun" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="5" />
+            <line x1="12" y1="1" x2="12" y2="3" />
+            <line x1="12" y1="21" x2="12" y2="23" />
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+            <line x1="1" y1="12" x2="3" y2="12" />
+            <line x1="21" y1="12" x2="23" y2="12" />
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+          </svg>
+          <svg id="theme-icon-moon" viewBox="0 0 24 24" style="display: none">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <div class="sidebar">
+        <div class="page-title">Round<br />Result</div>
+
+        <div class="distance-card">
+          <div class="distance-label">Distance from target</div>
+          <div class="distance-value">
+            <span id="distance">—</span><span class="unit"> km</span>
+          </div>
+        </div>
+
+        <div class="score-card">
+          <div class="score-label">Score</div>
+          <div class="score-value" id="score">—</div>
+        </div>
+
+        <div class="locations">
+          <div class="section-label">Locations</div>
+          <div class="loc-row">
+            <div class="loc-dot actual"></div>
+            <div class="loc-info">
+              <div class="loc-name">Actual</div>
+              <div class="loc-coords" id="coords-actual">—</div>
+            </div>
+          </div>
+          <div class="loc-row">
+            <div class="loc-dot guess"></div>
+            <div class="loc-info">
+              <div class="loc-name">Your guess</div>
+              <div class="loc-coords" id="coords-guess">—</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-retry" id="btn-retry">
+            Play again
+            <svg viewBox="0 0 24 24">
+              <polyline points="23 4 23 10 17 10" />
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+            </svg>
+          </button>
+          <button class="btn btn-home" id="btn-home">
+            Home
+            <svg viewBox="0 0 24 24">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+              <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="map-area">
+        <div id="result-map"></div>
+      </div>
+    </main>
+
+    <footer>
+      <div class="footer-text">BeloGuesser · v1.0</div>
+      <div class="footer-text" id="footer-round"></div>
+    </footer>
+
+    <script>
+      const root = document.documentElement;
+      const themeBtn = document.getElementById("theme-btn");
+      const iconSun = document.getElementById("theme-icon-sun");
+      const iconMoon = document.getElementById("theme-icon-moon");
+
+      function applyTheme(t) {
+        root.setAttribute("data-theme", t);
+        iconSun.style.display = t === "dark" ? "none" : "block";
+        iconMoon.style.display = t === "dark" ? "block" : "none";
+        localStorage.setItem("bg_theme", t);
+      }
+
+      const saved = localStorage.getItem("bg_theme") || "light";
+      applyTheme(saved);
+
+      themeBtn.addEventListener("click", () => {
+        applyTheme(
+          root.getAttribute("data-theme") === "dark" ? "light" : "dark",
+        );
+      });
+
+      function calcDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371,
+          toRad = (d) => (d * Math.PI) / 180;
+        const dLat = toRad(lat2 - lat1),
+          dLon = toRad(lon2 - lon1);
+        const a =
+          Math.sin(dLat / 2) ** 2 +
+          Math.cos(toRad(lat1)) *
+            Math.cos(toRad(lat2)) *
+            Math.sin(dLon / 2) ** 2;
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      }
+
+      function calcScore(distKm) {
+        return Math.round(5000 * Math.exp(-distKm / 2000));
+      }
+
+      function fmtCoord(lat, lon) {
+        const la = Math.abs(lat).toFixed(4) + (lat >= 0 ? "°N" : "°S");
+        const lo = Math.abs(lon).toFixed(4) + (lon >= 0 ? "°E" : "°W");
+        return `${la}, ${lo}`;
+      }
+
+      const actualLat = parseFloat(localStorage.getItem("actualLat"));
+      const actualLon = parseFloat(localStorage.getItem("actualLon"));
+      const guessLat = parseFloat(localStorage.getItem("guessLat"));
+      const guessLon = parseFloat(localStorage.getItem("guessLon"));
+
+      const hasData = [actualLat, actualLon, guessLat, guessLon].every(
+        (v) => !isNaN(v),
+      );
+
+      const aLat = hasData ? actualLat : 48.8566;
+      const aLon = hasData ? actualLon : 2.3522;
+      const gLat = hasData ? guessLat : 51.5074;
+      const gLon = hasData ? guessLon : -0.1278;
+
+      const dist = calcDistance(aLat, aLon, gLat, gLon);
+      const score = calcScore(dist);
+
+      document.getElementById("distance").textContent = dist.toFixed(1);
+      document.getElementById("score").textContent = score.toLocaleString();
+      document.getElementById("coords-actual").textContent = fmtCoord(
+        aLat,
+        aLon,
+      );
+      document.getElementById("coords-guess").textContent = fmtCoord(
+        gLat,
+        gLon,
+      );
+
+      const map = L.map("result-map", {
+        zoomControl: true,
+        attributionControl: false,
+      });
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 18,
+      }).addTo(map);
+
+      const mkIcon = (color) =>
+        L.divIcon({
+          className: "",
+          html: `<div style="width:16px;height:16px;background:${color};border-radius:50%;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.4);"></div>`,
+          iconSize: [16, 16],
+          iconAnchor: [8, 8],
+        });
+
+      L.marker([aLat, aLon], { icon: mkIcon("#2ecc71") })
+        .addTo(map)
+        .bindPopup("Actual location");
+      L.marker([gLat, gLon], { icon: mkIcon("#3498db") })
+        .addTo(map)
+        .bindPopup("Your guess");
+
+      L.polyline(
+        [
+          [aLat, aLon],
+          [gLat, gLon],
+        ],
+        {
+          color: "#CC1F1F",
+          weight: 2.5,
+          opacity: 0.8,
+          dashArray: "8, 8",
+        },
+      ).addTo(map);
+
+      map.fitBounds(
+        L.latLngBounds([
+          [aLat, aLon],
+          [gLat, gLon],
+        ]),
+        { padding: [60, 60] },
+      );
+
+      document.getElementById("btn-home").addEventListener("click", () => {
+        [
+          "actualLat",
+          "actualLon",
+          "guessLat",
+          "guessLon",
+          "gameStartLat",
+          "gameStartLon",
+        ].forEach((k) => localStorage.removeItem(k));
+        window.location.href = "index.html";
+      });
+
+      document.getElementById("btn-retry").addEventListener("click", () => {
+        ["guessLat", "guessLon", "gameStartLat", "gameStartLon"].forEach((k) =>
+          localStorage.removeItem(k),
+        );
+        window.location.href = "game.html";
+      });
+    </script>
+  </body>
+</html>
