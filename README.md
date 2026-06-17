@@ -1,6 +1,6 @@
-# BeloGuesser
+# BeloGuessr
 
-BeloGuesser is a browser-based game inspired by GeoGuessr mechanics. The player navigates through random street panoramas and marks their current location on an interactive map as accurately as possible.
+BeloGuessr is a browser-based game inspired by GeoGuessr mechanics. The player navigates through random street panoramas and marks their current location on an interactive map as accurately as possible.
 
 ## Screenshots
 
